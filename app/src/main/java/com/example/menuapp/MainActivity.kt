@@ -3,6 +3,7 @@ package com.example.menuapp
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.menuapp.dataclasses.EntitiesWrapper
@@ -29,8 +30,12 @@ class MainActivity : AppCompatActivity() {
         adapter.deleteFile = {
             deleteFile(it)
         }
-        adapter.deleteDir = {
-            deleteDirectory(it)
+        adapter.deleteDir = { position, shouldDelete ->
+            if (shouldDelete) deletePartOfDirectory(position)
+            else deleteDirectory(position)
+        }
+        adapter.showErrorByDeletingFile = {
+            showErrorByDeletingFile()
         }
         rv_files_dirs.adapter = adapter
         rv_files_dirs.layoutManager = LinearLayoutManager(this)
@@ -41,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         tv_back.visibility = View.GONE
         val list = mutableListOf<EntitiesWrapper>()
         Data.packages.forEach {
-            if(!it.isDeleted) list.add(EntitiesWrapper().apply { dir = it })
+            if (!it.isDeleted) list.add(EntitiesWrapper().apply { dir = it })
         }
         adapter.list = list as ArrayList<EntitiesWrapper>
     }
@@ -53,16 +58,27 @@ class MainActivity : AppCompatActivity() {
         }
         val list = mutableListOf<EntitiesWrapper>()
         files.forEach {
-            if(!it.isDeleted) list.add(EntitiesWrapper().apply { file = it })
+            if (!it.isDeleted) list.add(EntitiesWrapper().apply { file = it })
         }
         adapter.list = list as ArrayList<EntitiesWrapper>
     }
 
-    private fun deleteFile(file: FileEntity,) {
+    private fun deleteFile(file: FileEntity) {
         Data.setFileDeleted(file)
+        Toast.makeText(this,"Файл удален успешно", Toast.LENGTH_SHORT).show()
     }
 
     private fun deleteDirectory(position: Int) {
         Data.setDirDeleted(position)
+        Toast.makeText(this,"Папка удалена успешно", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun deletePartOfDirectory(position: Int) {
+        Data.setDirPartDeleted(position)
+        Toast.makeText(this,"Не удалось удалить папку - файл '7 image.jpg' недоступен.", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showErrorByDeletingFile() {
+        Toast.makeText(this,"Не удалось удалить файл '7 image.jpg'.", Toast.LENGTH_SHORT).show()
     }
 }

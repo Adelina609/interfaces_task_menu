@@ -17,12 +17,26 @@ class Data {
             packages[position].isDeleted = true
         }
 
+        fun setDirPartDeleted(position: Int) {
+            val list = packages[position].list
+            list.forEachIndexed { index, fileEntity ->
+                if(index != list.size-1) {
+                    fileEntity.isDeleted = true
+                }
+            }
+        }
+
         fun getFiles(position: Int): MutableList<FileEntity> {
             val files =  mutableListOf<FileEntity>()
             for (i in 0..7) {
                 files.add(FileEntity(name = "$i image.jpg", isDeleted = false, position))
             }
             return files
+        }
+
+        fun canDeleteFile(position: Int, packagePosition: Int): Boolean {
+            return !(packagePosition == packages.size - 1 &&
+                    position == packages[packagePosition].list.filter{ f -> !f.isDeleted}.size - 1)
         }
     }
 

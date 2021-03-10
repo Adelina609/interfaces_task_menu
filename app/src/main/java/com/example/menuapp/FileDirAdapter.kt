@@ -23,8 +23,9 @@ class FileDirAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
 
     lateinit var deleteFile: (FileEntity) -> Unit
-    lateinit var deleteDir: (Int) -> Unit
+    lateinit var deleteDir: (Int, Boolean) -> Unit
     lateinit var openFiles: (List<FileEntity>) -> Unit
+    lateinit var showErrorByDeletingFile: () -> Unit
 
     override fun getItemViewType(position: Int): Int {
         return if (list[position].isFile()) 0 else 1
@@ -51,16 +52,20 @@ class FileDirAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    fun deleteFile(file: FileEntity, position: Int) {
-        deleteFile.invoke(file)
-        list.removeAt(position)
-        notifyDataSetChanged()
+    private fun deleteFile(file: FileEntity, position: Int) {
+        if (Data.canDeleteFile(position, file.packagePosition)) {
+            deleteFile.invoke(file)
+            list.removeAt(position)
+            notifyDataSetChanged()
+        } else showErrorByDeletingFile()
     }
 
-    fun deleteDir(position: Int) {
-        deleteDir.invoke(position)
-        list.removeAt(position)
-        notifyDataSetChanged()
+    private fun deleteDir(position: Int) {
+        deleteDir.invoke(position, position == list.size - 1)
+        if (position != list.size - 1) {
+            list.removeAt(position)
+            notifyDataSetChanged()
+        }
     }
 
     inner class FilesViewHolder(view: View) : RecyclerView.ViewHolder(view) {
